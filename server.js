@@ -209,7 +209,7 @@ function formatAgentName(name) {
     developer: 'Charlie',
     pm: 'Project Manager',
     qa: 'QA Engineer',
-    devops: 'DevOps',
+    devops: 'Frank',
     admin: 'Admin',
   };
   return names[name] || name.charAt(0).toUpperCase() + name.slice(1);
