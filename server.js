@@ -205,7 +205,7 @@ function getAgents() {
 function formatAgentName(name) {
   const names = {
     main: 'K2S0',
-    k2so: 'K2S0',
+    k2so: 'K2S0 (legacy)',
     developer: 'Developer',
     pm: 'Project Manager',
     qa: 'QA Engineer',
