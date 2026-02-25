@@ -438,11 +438,151 @@
       100% { background-position: -200% 0; }
     }
 
+    /* ── Tabs ── */
+    .tab-nav {
+      display: flex;
+      gap: 0.25rem;
+      padding: 0 2rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+      letter-spacing: 0.03em;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Skills ── */
+    .skills-controls {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .skills-search {
+      flex: 1;
+      min-width: 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.55rem 0.9rem;
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .skills-search:focus { border-color: var(--accent); }
+    .skills-search::placeholder { color: var(--muted); }
+
+    .skills-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .skill-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .skill-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .skill-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .skill-emoji {
+      font-size: 1.4rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .skill-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      font-family: monospace;
+    }
+
+    .skill-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 0.75rem;
+    }
+
+    .skill-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .skill-requires {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .skill-tag {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(127,90,240,0.12);
+      color: var(--accent);
+      border: 1px solid rgba(127,90,240,0.25);
+      font-family: monospace;
+    }
+
+    .skill-link {
+      font-size: 0.7rem;
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .skill-link:hover { text-decoration: underline; }
+
     /* ── Responsive ── */
     @media (max-width: 640px) {
       .topbar { padding: 0 1rem; }
+      .tab-nav { padding: 0 1rem; }
       main { padding: 1rem 1rem 3rem; }
       .agent-grid { grid-template-columns: 1fr; }
+      .skills-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -462,7 +602,13 @@
   </div>
 </div>
 
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview', this)">Overview</button>
+  <button class="tab-btn" onclick="switchTab('skills', this)">Skills</button>
+</div>
+
 <main>
+<div class="tab-panel active" id="tab-overview">
 
   <!-- Stat Strip -->
   <div class="stat-strip" id="statStrip">
@@ -519,6 +665,19 @@
   <div class="activity-list" id="activityList">
     <div class="empty-state">Loading…</div>
   </div>
+
+</div><!-- end tab-overview -->
+
+<!-- Skills Tab -->
+<div class="tab-panel" id="tab-skills">
+  <div class="skills-controls">
+    <input class="skills-search" type="search" placeholder="Search skills…" id="skillSearch" oninput="filterSkills()" />
+    <div class="skills-count" id="skillsCount"></div>
+  </div>
+  <div class="skills-grid" id="skillsGrid">
+    <div class="empty-state">Loading skills…</div>
+  </div>
+</div><!-- end tab-skills -->
 
 </main>
 
@@ -713,6 +872,80 @@ async function refresh() {
 // Kick off
 refresh();
 setInterval(refresh, 10000);
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'skills' && !window._skillsLoaded) loadSkills();
+}
+
+// ── Skills ─────────────────────────────────────────────────────────────────
+
+let allSkills = [];
+
+async function loadSkills() {
+  window._skillsLoaded = true;
+  try {
+    const res = await fetch('/api/skills');
+    allSkills = await res.json();
+    renderSkills(allSkills);
+  } catch (e) {
+    document.getElementById('skillsGrid').innerHTML =
+      '<div class="empty-state">Failed to load skills.</div>';
+  }
+}
+
+function filterSkills() {
+  const q = document.getElementById('skillSearch').value.toLowerCase();
+  const filtered = q
+    ? allSkills.filter(s =>
+        (s.name || '').toLowerCase().includes(q) ||
+        (s.description || '').toLowerCase().includes(q))
+    : allSkills;
+  renderSkills(filtered);
+}
+
+function renderSkills(skills) {
+  const el = document.getElementById('skillsGrid');
+  const countEl = document.getElementById('skillsCount');
+  countEl.textContent = `${skills.length} skill${skills.length !== 1 ? 's' : ''}`;
+
+  if (!skills.length) {
+    el.innerHTML = '<div class="empty-state">No skills match your search.</div>';
+    return;
+  }
+
+  el.innerHTML = skills.map(s => {
+    const emoji = s.emoji || '🧩';
+    const allReqs = [
+      ...(s.requires.bins || []),
+      ...(s.requires.anyBins || []),
+      ...(s.requires.config || []),
+    ];
+    const tags = allReqs.slice(0, 4).map(r =>
+      `<span class="skill-tag">${escHtml(r)}</span>`).join('');
+    const link = s.homepage
+      ? `<a class="skill-link" href="${escHtml(s.homepage)}" target="_blank" rel="noopener">↗ docs</a>`
+      : '';
+
+    return `
+      <div class="skill-card">
+        <div class="skill-card-header">
+          <span class="skill-emoji">${emoji}</span>
+          <span class="skill-name">${escHtml(s.name || '')}</span>
+        </div>
+        <div class="skill-desc">${escHtml(s.description || '')}</div>
+        <div class="skill-footer">
+          <div class="skill-requires">${tags}</div>
+          ${link}
+        </div>
+      </div>`;
+  }).join('');
+}
 </script>
 </body>
 </html>
