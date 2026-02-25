@@ -207,8 +207,8 @@ function formatAgentName(name) {
     main: 'K2S0',
     k2so: 'K2S0 (legacy)',
     developer: 'Charlie',
-    pm: 'Project Manager',
-    qa: 'QA Engineer',
+    pm: 'Dennis',
+    qa: 'Mac',
     devops: 'Frank',
     admin: 'Admin',
   };
