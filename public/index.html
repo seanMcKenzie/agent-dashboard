@@ -31,7 +31,6 @@
       min-height: 100vh;
     }
 
-    /* ── Layout ── */
     .topbar {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -45,538 +44,152 @@
       z-index: 100;
     }
 
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
+    .topbar-left { display: flex; align-items: center; gap: 0.75rem; }
+    .topbar-logo { font-size: 1.1rem; font-weight: 800; color: var(--accent); letter-spacing: -0.02em; }
+    .topbar-sub { color: var(--muted); font-size: 0.75rem; border-left: 1px solid var(--border); padding-left: 0.75rem; }
+    .topbar-right { display: flex; align-items: center; gap: 1rem; }
 
-    .topbar-logo {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--accent);
-      letter-spacing: -0.02em;
-    }
-
-    .topbar-sub {
-      color: var(--muted);
-      font-size: 0.75rem;
-      border-left: 1px solid var(--border);
-      padding-left: 0.75rem;
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .refresh-badge {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.72rem;
-      color: var(--muted);
-    }
-
-    .dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--green);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
+    .refresh-badge { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--muted); }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s ease-in-out infinite; }
     .dot.error { background: var(--red); animation: none; }
+    .dot.disconnected { background: var(--yellow); animation: blink 1s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+    .last-updated { font-size: 0.72rem; color: var(--muted); }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
+    main { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
 
-    .last-updated {
-      font-size: 0.72rem;
-      color: var(--muted);
-    }
-
-    main {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 1.5rem 2rem 3rem;
-    }
-
-    /* ── Stat Strip ── */
-    .stat-strip {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.1rem 1.25rem;
-    }
-
-    .stat-label {
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-    }
-
-    .stat-value {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1;
-    }
-
+    /* Stat Strip */
+    .stat-strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; }
+    .stat-label { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--text); line-height: 1; }
     .stat-value.accent { color: var(--accent); }
-    .stat-value.green  { color: var(--green); }
+    .stat-value.green { color: var(--green); }
     .stat-value.orange { color: var(--orange); }
-    .stat-value.blue   { color: var(--blue); }
+    .stat-value.blue { color: var(--blue); }
+    .stat-sub { font-size: 0.7rem; color: var(--muted); margin-top: 0.3rem; }
 
-    .stat-sub {
-      font-size: 0.7rem;
-      color: var(--muted);
-      margin-top: 0.3rem;
-    }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .section-title { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 
-    /* ── Section Headers ── */
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-    }
-
-    .section-title {
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    /* ── Agent Grid ── */
-    .agent-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2.5rem;
-    }
-
-    .agent-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.25rem;
-      position: relative;
-      overflow: hidden;
-      transition: border-color 0.2s;
-    }
-
+    /* Agent Grid */
+    .agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+    .agent-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; position: relative; overflow: hidden; transition: border-color 0.2s; }
     .agent-card:hover { border-color: var(--subtle); }
+    .agent-card .card-accent-bar { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .agent-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
+    .agent-name { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .agent-id { font-size: 0.7rem; color: var(--muted); margin-top: 0.15rem; font-family: monospace; }
 
-    .agent-card .card-accent-bar {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-    }
+    .status-pill { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+    .status-pill.active { background: rgba(44,182,125,0.15); color: var(--green); border: 1px solid rgba(44,182,125,0.3); }
+    .status-pill.recent { background: rgba(244,208,63,0.12); color: var(--yellow); border: 1px solid rgba(244,208,63,0.25); }
+    .status-pill.idle { background: rgba(114,116,138,0.12); color: var(--muted); border: 1px solid rgba(114,116,138,0.25); }
+    .status-pill.never { background: rgba(229,49,112,0.1); color: var(--red); border: 1px solid rgba(229,49,112,0.2); }
+    .status-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 
-    .agent-card-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-    }
-
-    .agent-name {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .agent-id {
-      font-size: 0.7rem;
-      color: var(--muted);
-      margin-top: 0.15rem;
-      font-family: monospace;
-    }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    .status-pill.active  { background: rgba(44,182,125,0.15); color: var(--green);  border: 1px solid rgba(44,182,125,0.3); }
-    .status-pill.recent  { background: rgba(244,208,63,0.12);  color: var(--yellow); border: 1px solid rgba(244,208,63,0.25); }
-    .status-pill.idle    { background: rgba(114,116,138,0.12); color: var(--muted);  border: 1px solid rgba(114,116,138,0.25); }
-    .status-pill.never   { background: rgba(229,49,112,0.1);   color: var(--red);    border: 1px solid rgba(229,49,112,0.2); }
-
-    .status-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-
-    .agent-metrics {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .metric {
-      background: var(--surface2);
-      border-radius: 8px;
-      padding: 0.6rem 0.75rem;
-    }
-
-    .metric-label {
-      font-size: 0.65rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 0.2rem;
-    }
-
-    .metric-value {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .agent-model {
-      font-size: 0.7rem;
-      color: var(--muted);
-      font-family: monospace;
-      margin-bottom: 0.75rem;
-    }
-
-    .agent-last-seen {
-      font-size: 0.72rem;
-      color: var(--muted);
-    }
-
+    .agent-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
+    .metric { background: var(--surface2); border-radius: 8px; padding: 0.6rem 0.75rem; }
+    .metric-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.2rem; }
+    .metric-value { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .agent-model { font-size: 0.7rem; color: var(--muted); font-family: monospace; margin-bottom: 0.75rem; }
+    .agent-last-seen { font-size: 0.72rem; color: var(--muted); }
     .agent-last-seen span { color: var(--text); }
 
-    /* Token bar */
-    .token-bar-wrap {
-      margin: 0.75rem 0;
-    }
+    .token-bar-wrap { margin: 0.75rem 0; }
+    .token-bar-labels { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--muted); margin-bottom: 0.3rem; }
+    .token-bar { height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .token-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--blue)); transition: width 0.4s ease; }
 
-    .token-bar-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.65rem;
-      color: var(--muted);
-      margin-bottom: 0.3rem;
-    }
-
-    .token-bar {
-      height: 4px;
-      background: var(--surface2);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .token-bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      background: linear-gradient(90deg, var(--accent), var(--blue));
-      transition: width 0.4s ease;
-    }
-
-    /* ── Recent Activity ── */
-    .activity-list {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-
-    .activity-header {
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .activity-item {
-      display: flex;
-      gap: 1rem;
-      padding: 0.9rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      align-items: flex-start;
-      transition: background 0.15s;
-    }
-
+    /* Activity List */
+    .activity-list { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .activity-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    .activity-item { display: flex; gap: 1rem; padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border); align-items: flex-start; transition: background 0.15s; cursor: pointer; }
     .activity-item:last-child { border-bottom: none; }
     .activity-item:hover { background: var(--surface2); }
+    .activity-item.expandable .activity-text::after { content: ' ▸'; color: var(--muted); font-size: 0.7rem; }
+    .activity-item.expanded .activity-text::after { content: ' ▾'; color: var(--accent); font-size: 0.7rem; }
+    .activity-agent-tag { flex-shrink: 0; font-size: 0.68rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 6px; background: var(--surface2); color: var(--accent); font-family: monospace; margin-top: 1px; min-width: 72px; text-align: center; }
+    .activity-content { flex: 1; min-width: 0; }
+    .activity-text { color: var(--text); font-size: 0.85rem; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .activity-item.expanded .activity-text { white-space: pre-wrap; word-break: break-word; overflow: visible; text-overflow: unset; }
+    .activity-full { display: none; margin-top: 0.5rem; padding: 0.75rem; background: var(--surface2); border-radius: 8px; font-size: 0.82rem; color: var(--text); line-height: 1.6; white-space: pre-wrap; word-break: break-word; max-height: 400px; overflow-y: auto; }
+    .activity-item.expanded .activity-full { display: block; }
+    .activity-time { font-size: 0.68rem; color: var(--muted); margin-top: 0.2rem; }
+    .empty-state { padding: 2rem; text-align: center; color: var(--muted); font-size: 0.85rem; }
 
-    .activity-agent-tag {
-      flex-shrink: 0;
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 0.2rem 0.5rem;
-      border-radius: 6px;
-      background: var(--surface2);
-      color: var(--accent);
-      font-family: monospace;
-      margin-top: 1px;
-      min-width: 72px;
-      text-align: center;
-    }
+    /* Token Chart */
+    .token-chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; margin-bottom: 2rem; }
+    .token-bars { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
+    .token-row { display: flex; align-items: center; gap: 0.75rem; }
+    .token-row-name { width: 130px; flex-shrink: 0; font-size: 0.8rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .token-row-bar { flex: 1; height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .token-row-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+    .token-row-count { width: 80px; text-align: right; font-size: 0.75rem; color: var(--muted); font-family: monospace; flex-shrink: 0; }
 
-    .activity-content {
-      flex: 1;
-      min-width: 0;
-    }
+    .skeleton { background: linear-gradient(90deg, var(--surface2) 25%, var(--subtle) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-    .activity-text {
-      color: var(--text);
-      font-size: 0.85rem;
-      line-height: 1.5;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .activity-time {
-      font-size: 0.68rem;
-      color: var(--muted);
-      margin-top: 0.2rem;
-    }
-
-    .empty-state {
-      padding: 2rem;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
-
-    /* ── Token Chart ── */
-    .token-chart-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.25rem;
-      margin-bottom: 2rem;
-    }
-
-    .token-bars {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      margin-top: 1rem;
-    }
-
-    .token-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .token-row-name {
-      width: 130px;
-      flex-shrink: 0;
-      font-size: 0.8rem;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .token-row-bar {
-      flex: 1;
-      height: 8px;
-      background: var(--surface2);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .token-row-fill {
-      height: 100%;
-      border-radius: 4px;
-      background: linear-gradient(90deg, var(--accent), var(--blue));
-      transition: width 0.6s ease;
-    }
-
-    .token-row-count {
-      width: 80px;
-      text-align: right;
-      font-size: 0.75rem;
-      color: var(--muted);
-      font-family: monospace;
-      flex-shrink: 0;
-    }
-
-    /* ── Skeleton loader ── */
-    .skeleton {
-      background: linear-gradient(90deg, var(--surface2) 25%, var(--subtle) 50%, var(--surface2) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 6px;
-    }
-
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    /* ── Tabs ── */
-    .tab-nav {
-      display: flex;
-      gap: 0.25rem;
-      padding: 0 2rem;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .tab-btn {
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-size: 0.82rem;
-      font-weight: 600;
-      padding: 0.75rem 1rem;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
-      transition: color 0.15s, border-color 0.15s;
-      letter-spacing: 0.03em;
-    }
-
+    /* Tabs */
+    .tab-nav { display: flex; gap: 0.25rem; padding: 0 2rem; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .tab-btn { background: none; border: none; color: var(--muted); font-size: 0.82rem; font-weight: 600; padding: 0.75rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s; letter-spacing: 0.03em; }
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* ── Skills ── */
-    .skills-controls {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1.25rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .skills-search {
-      flex: 1;
-      min-width: 200px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.55rem 0.9rem;
-      color: var(--text);
-      font-size: 0.85rem;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
+    /* Skills */
+    .skills-controls { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; align-items: center; flex-wrap: wrap; }
+    .skills-search { flex: 1; min-width: 200px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.55rem 0.9rem; color: var(--text); font-size: 0.85rem; outline: none; transition: border-color 0.15s; }
     .skills-search:focus { border-color: var(--accent); }
     .skills-search::placeholder { color: var(--muted); }
-
-    .skills-count {
-      font-size: 0.75rem;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1rem;
-    }
-
-    .skill-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.1rem 1.25rem;
-      transition: border-color 0.2s, transform 0.2s;
-    }
-
-    .skill-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-
-    .skill-card-header {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .skill-emoji {
-      font-size: 1.4rem;
-      line-height: 1;
-      flex-shrink: 0;
-    }
-
-    .skill-name {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: var(--text);
-      font-family: monospace;
-    }
-
-    .skill-desc {
-      font-size: 0.8rem;
-      color: var(--muted);
-      line-height: 1.55;
-      margin-bottom: 0.75rem;
-    }
-
-    .skill-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-    }
-
-    .skill-requires {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.3rem;
-    }
-
-    .skill-tag {
-      font-size: 0.65rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 999px;
-      background: rgba(127,90,240,0.12);
-      color: var(--accent);
-      border: 1px solid rgba(127,90,240,0.25);
-      font-family: monospace;
-    }
-
-    .skill-link {
-      font-size: 0.7rem;
-      color: var(--blue);
-      text-decoration: none;
-    }
-
+    .skills-count { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .skill-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; transition: border-color 0.2s, transform 0.2s; }
+    .skill-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .skill-card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+    .skill-emoji { font-size: 1.4rem; line-height: 1; flex-shrink: 0; }
+    .skill-name { font-size: 0.9rem; font-weight: 700; color: var(--text); font-family: monospace; }
+    .skill-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.55; margin-bottom: 0.75rem; }
+    .skill-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; }
+    .skill-requires { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+    .skill-tag { font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 999px; background: rgba(127,90,240,0.12); color: var(--accent); border: 1px solid rgba(127,90,240,0.25); font-family: monospace; }
+    .skill-link { font-size: 0.7rem; color: var(--blue); text-decoration: none; }
     .skill-link:hover { text-decoration: underline; }
 
-    /* ── Responsive ── */
+    /* Activity Log Tab */
+    .log-controls { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; align-items: center; flex-wrap: wrap; }
+    .log-filter { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.45rem 0.75rem; color: var(--text); font-size: 0.82rem; outline: none; cursor: pointer; }
+    .log-filter:focus { border-color: var(--accent); }
+    .log-auto-scroll { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: var(--muted); cursor: pointer; }
+    .log-auto-scroll input { accent-color: var(--accent); }
+
+    .log-container { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; max-height: 70vh; display: flex; flex-direction: column; }
+    .log-scroll { overflow-y: auto; flex: 1; max-height: 65vh; }
+    .log-entry { display: flex; gap: 0.75rem; padding: 0.65rem 1.25rem; border-bottom: 1px solid var(--border); align-items: flex-start; font-size: 0.82rem; transition: background 0.1s; }
+    .log-entry:hover { background: var(--surface2); }
+    .log-entry:last-child { border-bottom: none; }
+    .log-entry .log-time { flex-shrink: 0; width: 70px; color: var(--muted); font-family: monospace; font-size: 0.72rem; padding-top: 2px; }
+    .log-entry .log-agent { flex-shrink: 0; min-width: 72px; font-weight: 700; font-size: 0.72rem; padding: 0.15rem 0.45rem; border-radius: 5px; background: var(--surface2); text-align: center; font-family: monospace; }
+    .log-entry .log-type { flex-shrink: 0; width: 80px; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding-top: 2px; }
+    .log-type.message { color: var(--blue); }
+    .log-type.tool_call { color: var(--orange); }
+    .log-type.user_message { color: var(--green); }
+    .log-entry .log-detail { flex: 1; min-width: 0; color: var(--text); line-height: 1.45; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .log-entry .log-tokens { flex-shrink: 0; width: 55px; text-align: right; color: var(--muted); font-family: monospace; font-size: 0.72rem; padding-top: 2px; }
+    .log-entry.expandable { cursor: pointer; }
+    .log-entry.expanded { flex-wrap: wrap; }
+    .log-entry.expanded .log-detail { white-space: pre-wrap; overflow: visible; text-overflow: unset; }
+    .log-entry.expanded .activity-full { display: block; width: 100%; margin-top: 0.5rem; }
+
+    .log-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .log-summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; }
+    .log-summary-agent { font-weight: 700; font-size: 0.88rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .log-summary-stats { display: flex; gap: 1rem; font-size: 0.72rem; color: var(--muted); }
+    .log-summary-stats span { display: flex; align-items: center; gap: 0.25rem; }
+    .log-summary-status { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; }
+
     @media (max-width: 640px) {
       .topbar { padding: 0 1rem; }
       .tab-nav { padding: 0 1rem; }
@@ -595,7 +208,7 @@
   </div>
   <div class="topbar-right">
     <div class="refresh-badge">
-      <div class="dot" id="statusDot"></div>
+      <div class="dot disconnected" id="statusDot"></div>
       <span id="statusText">Connecting…</span>
     </div>
     <div class="last-updated" id="lastUpdated">—</div>
@@ -604,13 +217,12 @@
 
 <div class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('overview', this)">Overview</button>
+  <button class="tab-btn" onclick="switchTab('activity-log', this)">Activity Log</button>
   <button class="tab-btn" onclick="switchTab('skills', this)">Skills</button>
 </div>
 
 <main>
 <div class="tab-panel active" id="tab-overview">
-
-  <!-- Stat Strip -->
   <div class="stat-strip" id="statStrip">
     <div class="stat-card">
       <div class="stat-label">Active Agents</div>
@@ -620,7 +232,7 @@
     <div class="stat-card">
       <div class="stat-label">Total Tokens</div>
       <div class="stat-value accent" id="statTokens">—</div>
-      <div class="stat-sub">estimated usage</div>
+      <div class="stat-sub" id="statTokenBreakdown">—</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Messages Sent</div>
@@ -639,34 +251,42 @@
     </div>
   </div>
 
-  <!-- Token Chart -->
-  <div class="section-header">
-    <div class="section-title">Token Usage by Agent</div>
-  </div>
+  <div class="section-header"><div class="section-title">Token Usage by Agent</div></div>
   <div class="token-chart-wrap">
-    <div class="token-bars" id="tokenChart">
-      <div class="empty-state">Loading…</div>
-    </div>
+    <div class="token-bars" id="tokenChart"><div class="empty-state">Loading…</div></div>
   </div>
 
-  <!-- Agent Cards -->
-  <div class="section-header">
-    <div class="section-title">Agent Status</div>
-  </div>
+  <div class="section-header"><div class="section-title">Agent Status</div></div>
   <div class="agent-grid" id="agentGrid">
     <div class="empty-state skeleton" style="height:180px; border-radius:14px;"></div>
     <div class="empty-state skeleton" style="height:180px; border-radius:14px;"></div>
   </div>
 
-  <!-- Recent Activity -->
-  <div class="section-header">
-    <div class="section-title">Recent Activity</div>
-  </div>
-  <div class="activity-list" id="activityList">
-    <div class="empty-state">Loading…</div>
-  </div>
+  <div class="section-header"><div class="section-title">Recent Activity</div></div>
+  <div class="activity-list" id="activityList"><div class="empty-state">Loading…</div></div>
+</div>
 
-</div><!-- end tab-overview -->
+<!-- Activity Log Tab -->
+<div class="tab-panel" id="tab-activity-log">
+  <div class="log-summary" id="logSummary"></div>
+  <div class="log-controls">
+    <select class="log-filter" id="logAgentFilter" onchange="renderActivityLog()">
+      <option value="all">All Agents</option>
+    </select>
+    <select class="log-filter" id="logTypeFilter" onchange="renderActivityLog()">
+      <option value="all">All Types</option>
+      <option value="message">Messages</option>
+      <option value="tool_call">Tool Calls</option>
+      <option value="user_message">User Messages</option>
+    </select>
+    <label class="log-auto-scroll"><input type="checkbox" id="logAutoScroll" checked /> Auto-scroll</label>
+  </div>
+  <div class="log-container">
+    <div class="log-scroll" id="logScroll">
+      <div class="empty-state">Waiting for data…</div>
+    </div>
+  </div>
+</div>
 
 <!-- Skills Tab -->
 <div class="tab-panel" id="tab-skills">
@@ -674,26 +294,18 @@
     <input class="skills-search" type="search" placeholder="Search skills…" id="skillSearch" oninput="filterSkills()" />
     <div class="skills-count" id="skillsCount"></div>
   </div>
-  <div class="skills-grid" id="skillsGrid">
-    <div class="empty-state">Loading skills…</div>
-  </div>
-</div><!-- end tab-skills -->
-
+  <div class="skills-grid" id="skillsGrid"><div class="empty-state">Loading skills…</div></div>
+</div>
 </main>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
 const AGENT_COLORS = {
-  main: '#7f5af0',
-  k2so: '#7f5af0',
-  developer: '#2cb67d', // Charlie
-  pm: '#ff8906',
-  qa: '#e53170',
-  devops: '#0ea5e9',
+  main: '#7f5af0', k2so: '#7f5af0', developer: '#2cb67d',
+  pm: '#ff8906', qa: '#e53170', devops: '#0ea5e9',
 };
 
-function agentColor(name) {
-  return AGENT_COLORS[name] || '#7f5af0';
-}
+function agentColor(name) { return AGENT_COLORS[name] || '#7f5af0'; }
 
 function fmtNum(n) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
@@ -704,8 +316,7 @@ function fmtNum(n) {
 function fmtTime(ts) {
   if (!ts) return 'Never';
   const d = new Date(ts);
-  const now = Date.now();
-  const diff = now - d.getTime();
+  const diff = Date.now() - d.getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return 'Just now';
   if (mins < 60) return `${mins}m ago`;
@@ -714,14 +325,28 @@ function fmtTime(ts) {
   return d.toLocaleDateString();
 }
 
-function statusLabel(status) {
-  return { active: 'Active', recent: 'Recent', idle: 'Idle', never: 'Never' }[status] || status;
+function fmtTimestamp(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
+
+function statusLabel(s) { return { active: 'Active', recent: 'Recent', idle: 'Idle', never: 'Never' }[s] || s; }
+
+function escHtml(str) { return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function toggleExpand(el) {
+  if (!el.classList.contains('expandable')) return;
+  el.classList.toggle('expanded');
+}
+
+// ── Renderers ──
 
 function renderStats(system) {
   document.getElementById('statActive').textContent = system.activeAgents;
   document.getElementById('statTotal').textContent = `of ${system.totalAgents} total`;
   document.getElementById('statTokens').textContent = fmtNum(system.totalTokens);
+  document.getElementById('statTokenBreakdown').textContent = `↑${fmtNum(system.totalInputTokens || 0)} in · ↓${fmtNum(system.totalOutputTokens || 0)} out`;
   document.getElementById('statMessages').textContent = fmtNum(system.totalMessages);
   document.getElementById('statTools').textContent = fmtNum(system.totalToolCalls);
   document.getElementById('statCost').textContent = `$${system.estimatedCostUSD}`;
@@ -730,150 +355,182 @@ function renderStats(system) {
 function renderTokenChart(agents) {
   const max = Math.max(...agents.map(a => a.totalTokens), 1);
   const el = document.getElementById('tokenChart');
-
-  if (!agents.length) {
-    el.innerHTML = '<div class="empty-state">No agent data found.</div>';
-    return;
-  }
-
-  el.innerHTML = agents
-    .sort((a, b) => b.totalTokens - a.totalTokens)
-    .map(a => {
-      const pct = Math.max((a.totalTokens / max) * 100, 1);
-      const color = agentColor(a.name);
-      return `
-        <div class="token-row">
-          <div class="token-row-name">${a.displayName}</div>
-          <div class="token-row-bar">
-            <div class="token-row-fill" style="width:${pct}%; background: linear-gradient(90deg, ${color}, ${color}99);"></div>
-          </div>
-          <div class="token-row-count">${fmtNum(a.totalTokens)}</div>
-        </div>`;
-    }).join('');
+  if (!agents.length) { el.innerHTML = '<div class="empty-state">No agent data.</div>'; return; }
+  el.innerHTML = agents.sort((a, b) => b.totalTokens - a.totalTokens).map(a => {
+    const pct = Math.max((a.totalTokens / max) * 100, 1);
+    const c = agentColor(a.name);
+    return `<div class="token-row">
+      <div class="token-row-name">${a.displayName}</div>
+      <div class="token-row-bar"><div class="token-row-fill" style="width:${pct}%; background:linear-gradient(90deg,${c},${c}99);"></div></div>
+      <div class="token-row-count">${fmtNum(a.totalTokens)}</div>
+    </div>`;
+  }).join('');
 }
 
 function renderAgentCards(agents) {
   const el = document.getElementById('agentGrid');
-  if (!agents.length) {
-    el.innerHTML = '<div class="empty-state">No agents found in ~/.openclaw/agents/</div>';
-    return;
-  }
-
+  if (!agents.length) { el.innerHTML = '<div class="empty-state">No agents found.</div>'; return; }
+  const max = Math.max(...agents.map(x => x.totalTokens), 1);
   el.innerHTML = agents.map(a => {
-    const color = agentColor(a.name);
-    const max = Math.max(...agents.map(x => x.totalTokens), 1);
+    const c = agentColor(a.name);
     const barPct = Math.max((a.totalTokens / max) * 100, 1);
-
-    return `
-      <div class="agent-card">
-        <div class="card-accent-bar" style="background: ${color};"></div>
-        <div class="agent-card-header">
-          <div>
-            <div class="agent-name">${a.displayName}</div>
-            <div class="agent-id">${a.name}</div>
-          </div>
-          <div class="status-pill ${a.status}">
-            <div class="status-dot"></div>
-            ${statusLabel(a.status)}
-          </div>
-        </div>
-
-        <div class="agent-model">⚙ ${a.model}</div>
-
-        <div class="agent-metrics">
-          <div class="metric">
-            <div class="metric-label">Messages</div>
-            <div class="metric-value">${fmtNum(a.totalMessages)}</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">Tool Calls</div>
-            <div class="metric-value">${fmtNum(a.totalToolCalls)}</div>
-          </div>
-          <div class="metric">
-            <div class="metric-label">Sessions</div>
-            <div class="metric-value">${a.sessionCount}</div>
-          </div>
-        </div>
-
-        <div class="token-bar-wrap">
-          <div class="token-bar-labels">
-            <span>Tokens</span>
-            <span>${fmtNum(a.totalTokens)}</span>
-          </div>
-          <div class="token-bar">
-            <div class="token-bar-fill" style="width:${barPct}%; background: linear-gradient(90deg, ${color}, ${color}99);"></div>
-          </div>
-        </div>
-
-        <div class="agent-last-seen">Last active: <span>${fmtTime(a.lastActivity)}</span></div>
-      </div>`;
+    return `<div class="agent-card">
+      <div class="card-accent-bar" style="background:${c};"></div>
+      <div class="agent-card-header">
+        <div><div class="agent-name">${a.displayName}</div><div class="agent-id">${a.name}</div></div>
+        <div class="status-pill ${a.status}"><div class="status-dot"></div>${statusLabel(a.status)}</div>
+      </div>
+      <div class="agent-model">⚙ ${a.model}</div>
+      <div class="agent-metrics">
+        <div class="metric"><div class="metric-label">Messages</div><div class="metric-value">${fmtNum(a.totalMessages)}</div></div>
+        <div class="metric"><div class="metric-label">Tool Calls</div><div class="metric-value">${fmtNum(a.totalToolCalls)}</div></div>
+        <div class="metric"><div class="metric-label">Sessions</div><div class="metric-value">${a.sessionCount}</div></div>
+      </div>
+      <div class="token-bar-wrap">
+        <div class="token-bar-labels"><span>Tokens (↑${fmtNum(a.totalInputTokens||0)} / ↓${fmtNum(a.totalOutputTokens||0)})</span><span>${fmtNum(a.totalTokens)}</span></div>
+        <div class="token-bar"><div class="token-bar-fill" style="width:${barPct}%; background:linear-gradient(90deg,${c},${c}99);"></div></div>
+      </div>
+      <div class="agent-last-seen">Last active: <span>${fmtTime(a.lastActivity)}</span></div>
+    </div>`;
   }).join('');
 }
 
 function renderActivity(agents) {
   const el = document.getElementById('activityList');
-
-  // Gather all recent messages across all agents
   const all = [];
+  for (const a of agents) for (const msg of (a.recentMessages || [])) all.push({ agent: a, msg });
+  all.sort((a, b) => new Date(b.msg.timestamp) - new Date(a.msg.timestamp));
+  const items = all.slice(0, 20);
+  if (!items.length) { el.innerHTML = '<div class="empty-state">No recent messages.</div>'; return; }
+  el.innerHTML = `<div class="activity-header">Recent Assistant Messages (click to expand)</div>` +
+    items.map(({ agent: a, msg }, i) => {
+      const hasFull = msg.full && msg.full.length > 200;
+      return `<div class="activity-item${hasFull ? ' expandable' : ''}" onclick="toggleExpand(this)">
+      <div class="activity-agent-tag" style="color:${agentColor(a.name)};">${a.displayName}</div>
+      <div class="activity-content">
+        <div class="activity-text">${escHtml(msg.preview)}</div>
+        ${hasFull ? `<div class="activity-full">${escHtml(msg.full)}</div>` : ''}
+        <div class="activity-time">${fmtTime(new Date(msg.timestamp).getTime())}</div>
+      </div>
+    </div>`;
+    }).join('');
+}
+
+// ── Activity Log Tab ──
+
+let currentAgents = [];
+
+function renderLogSummary(agents) {
+  const el = document.getElementById('logSummary');
+  el.innerHTML = agents.map(a => {
+    const c = agentColor(a.name);
+    const statusColors = { active: 'var(--green)', recent: 'var(--yellow)', idle: 'var(--muted)', never: 'var(--red)' };
+    return `<div class="log-summary-card">
+      <div class="log-summary-agent">
+        <span style="color:${c}">●</span> ${a.displayName}
+        <span class="log-summary-status" style="color:${statusColors[a.status] || 'var(--muted)'}">${statusLabel(a.status)}</span>
+      </div>
+      <div class="log-summary-stats">
+        <span>💬 ${a.totalMessages} msgs</span>
+        <span>🔧 ${a.totalToolCalls} tools</span>
+        <span>🪙 ${fmtNum(a.totalTokens)} tokens</span>
+        <span>📁 ${a.sessionCount} sessions</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Update agent filter dropdown
+  const filter = document.getElementById('logAgentFilter');
+  const currentVal = filter.value;
+  const existingNames = new Set([...filter.options].map(o => o.value));
   for (const a of agents) {
-    for (const msg of (a.recentMessages || [])) {
-      all.push({ agent: a, msg });
+    if (!existingNames.has(a.name)) {
+      const opt = document.createElement('option');
+      opt.value = a.name;
+      opt.textContent = a.displayName;
+      filter.appendChild(opt);
+    }
+  }
+  filter.value = currentVal;
+}
+
+function renderActivityLog() {
+  const agentFilter = document.getElementById('logAgentFilter').value;
+  const typeFilter = document.getElementById('logTypeFilter').value;
+  const el = document.getElementById('logScroll');
+
+  const allLogs = [];
+  for (const a of currentAgents) {
+    if (agentFilter !== 'all' && a.name !== agentFilter) continue;
+    for (const entry of (a.activityLog || [])) {
+      if (typeFilter !== 'all' && entry.type !== typeFilter) continue;
+      allLogs.push({ agent: a, entry });
     }
   }
 
-  // Sort by timestamp desc
-  all.sort((a, b) => new Date(b.msg.timestamp) - new Date(a.msg.timestamp));
-  const items = all.slice(0, 20);
+  allLogs.sort((a, b) => new Date(b.entry.timestamp) - new Date(a.entry.timestamp));
 
-  if (!items.length) {
-    el.innerHTML = '<div class="empty-state">No recent assistant messages found.</div>';
+  if (!allLogs.length) {
+    el.innerHTML = '<div class="empty-state">No activity log entries match filters.</div>';
     return;
   }
 
-  const header = `<div class="activity-header">Recent Assistant Messages</div>`;
-  const rows = items.map(({ agent: a, msg }) => `
-    <div class="activity-item">
-      <div class="activity-agent-tag" style="color: ${agentColor(a.name)};">${a.displayName}</div>
-      <div class="activity-content">
-        <div class="activity-text">${escHtml(msg.preview)}</div>
-        <div class="activity-time">${fmtTime(new Date(msg.timestamp).getTime())}</div>
-      </div>
-    </div>`).join('');
+  el.innerHTML = allLogs.slice(0, 200).map(({ agent: a, entry: e }) => {
+    let detail = '';
+    if (e.type === 'tool_call') detail = `<strong>${escHtml(e.tool)}</strong> ${escHtml(e.args || '')}`;
+    else detail = escHtml(e.preview || '');
 
-  el.innerHTML = header + rows;
-}
+    const hasFull = e.full && e.full.length > 200;
+    return `<div class="log-entry${hasFull ? ' expandable' : ''}" onclick="toggleExpand(this)">
+      <div class="log-time">${fmtTimestamp(e.timestamp)}</div>
+      <div class="log-agent" style="color:${agentColor(a.name)}">${a.displayName}</div>
+      <div class="log-type ${e.type}">${e.type === 'tool_call' ? 'Tool' : e.type === 'user_message' ? 'User' : 'Asst'}</div>
+      <div class="log-detail">${detail}${hasFull ? ' ▸' : ''}</div>
+      <div class="log-tokens">${e.tokens ? fmtNum(e.tokens) + 't' : ''}</div>
+      ${hasFull ? `<div class="activity-full">${escHtml(e.full)}</div>` : ''}
+    </div>`;
+  }).join('');
 
-function escHtml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-async function refresh() {
-  try {
-    const res = await fetch('/api/data');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-
-    renderStats(data.system);
-    renderTokenChart(data.agents);
-    renderAgentCards(data.agents);
-    renderActivity(data.agents);
-
-    document.getElementById('statusDot').className = 'dot';
-    document.getElementById('statusText').textContent = 'Live';
-    document.getElementById('lastUpdated').textContent =
-      'Updated ' + new Date().toLocaleTimeString();
-  } catch (err) {
-    document.getElementById('statusDot').className = 'dot error';
-    document.getElementById('statusText').textContent = 'Error — retrying';
-    console.error(err);
+  if (document.getElementById('logAutoScroll').checked) {
+    el.scrollTop = 0;
   }
 }
 
-// Kick off
-refresh();
-setInterval(refresh, 10000);
+// ── Main update ──
 
-// ── Tab switching ──────────────────────────────────────────────────────────
+function handleUpdate(data) {
+  currentAgents = data.agents;
+  renderStats(data.system);
+  renderTokenChart(data.agents);
+  renderAgentCards(data.agents);
+  renderActivity(data.agents);
+  renderLogSummary(data.agents);
+  renderActivityLog();
+  document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+// ── WebSocket ──
+
+const socket = io();
+
+socket.on('connect', () => {
+  document.getElementById('statusDot').className = 'dot';
+  document.getElementById('statusText').textContent = 'Live';
+});
+
+socket.on('disconnect', () => {
+  document.getElementById('statusDot').className = 'dot disconnected';
+  document.getElementById('statusText').textContent = 'Reconnecting…';
+});
+
+socket.on('connect_error', () => {
+  document.getElementById('statusDot').className = 'dot error';
+  document.getElementById('statusText').textContent = 'Connection error';
+});
+
+socket.on('dashboard-update', handleUpdate);
+
+// ── Tabs ──
 
 function switchTab(name, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -883,7 +540,7 @@ function switchTab(name, btn) {
   if (name === 'skills' && !window._skillsLoaded) loadSkills();
 }
 
-// ── Skills ─────────────────────────────────────────────────────────────────
+// ── Skills ──
 
 let allSkills = [];
 
@@ -894,56 +551,29 @@ async function loadSkills() {
     allSkills = await res.json();
     renderSkills(allSkills);
   } catch (e) {
-    document.getElementById('skillsGrid').innerHTML =
-      '<div class="empty-state">Failed to load skills.</div>';
+    document.getElementById('skillsGrid').innerHTML = '<div class="empty-state">Failed to load skills.</div>';
   }
 }
 
 function filterSkills() {
   const q = document.getElementById('skillSearch').value.toLowerCase();
-  const filtered = q
-    ? allSkills.filter(s =>
-        (s.name || '').toLowerCase().includes(q) ||
-        (s.description || '').toLowerCase().includes(q))
-    : allSkills;
-  renderSkills(filtered);
+  renderSkills(q ? allSkills.filter(s => (s.name||'').toLowerCase().includes(q) || (s.description||'').toLowerCase().includes(q)) : allSkills);
 }
 
 function renderSkills(skills) {
   const el = document.getElementById('skillsGrid');
-  const countEl = document.getElementById('skillsCount');
-  countEl.textContent = `${skills.length} skill${skills.length !== 1 ? 's' : ''}`;
-
-  if (!skills.length) {
-    el.innerHTML = '<div class="empty-state">No skills match your search.</div>';
-    return;
-  }
-
+  document.getElementById('skillsCount').textContent = `${skills.length} skill${skills.length !== 1 ? 's' : ''}`;
+  if (!skills.length) { el.innerHTML = '<div class="empty-state">No skills match.</div>'; return; }
   el.innerHTML = skills.map(s => {
     const emoji = s.emoji || '🧩';
-    const allReqs = [
-      ...(s.requires.bins || []),
-      ...(s.requires.anyBins || []),
-      ...(s.requires.config || []),
-    ];
-    const tags = allReqs.slice(0, 4).map(r =>
-      `<span class="skill-tag">${escHtml(r)}</span>`).join('');
-    const link = s.homepage
-      ? `<a class="skill-link" href="${escHtml(s.homepage)}" target="_blank" rel="noopener">↗ docs</a>`
-      : '';
-
-    return `
-      <div class="skill-card">
-        <div class="skill-card-header">
-          <span class="skill-emoji">${emoji}</span>
-          <span class="skill-name">${escHtml(s.name || '')}</span>
-        </div>
-        <div class="skill-desc">${escHtml(s.description || '')}</div>
-        <div class="skill-footer">
-          <div class="skill-requires">${tags}</div>
-          ${link}
-        </div>
-      </div>`;
+    const allReqs = [...(s.requires.bins||[]), ...(s.requires.anyBins||[]), ...(s.requires.config||[])];
+    const tags = allReqs.slice(0, 4).map(r => `<span class="skill-tag">${escHtml(r)}</span>`).join('');
+    const link = s.homepage ? `<a class="skill-link" href="${escHtml(s.homepage)}" target="_blank">↗ docs</a>` : '';
+    return `<div class="skill-card">
+      <div class="skill-card-header"><span class="skill-emoji">${emoji}</span><span class="skill-name">${escHtml(s.name||'')}</span></div>
+      <div class="skill-desc">${escHtml(s.description||'')}</div>
+      <div class="skill-footer"><div class="skill-requires">${tags}</div>${link}</div>
+    </div>`;
   }).join('');
 }
 </script>

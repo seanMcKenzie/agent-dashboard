@@ -1,9 +1,13 @@
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
 const PORT = 3131;
 const OPENCLAW_DIR = path.join(os.homedir(), '.openclaw');
 const AGENTS_DIR = path.join(OPENCLAW_DIR, 'agents');
@@ -58,22 +62,20 @@ function parseSession(jsonlPath, sessionId) {
   let lastActivity = null;
   let model = 'unknown';
   let recentMessages = [];
+  let activityLog = [];
 
   for (const entry of entries) {
     if (!entry) continue;
 
-    // Track model
     if (entry.type === 'model_change' && entry.modelId) {
       model = entry.modelId;
     }
 
-    // Track timestamps
     if (entry.timestamp) {
       const t = new Date(entry.timestamp).getTime();
       if (!lastActivity || t > lastActivity) lastActivity = t;
     }
 
-    // Parse messages
     if (entry.type === 'message' && entry.message) {
       const msg = entry.message;
       const role = msg.role;
@@ -86,30 +88,65 @@ function parseSession(jsonlPath, sessionId) {
         outputTokens += tokens;
         messageCount++;
 
-        // Count tool calls
         if (Array.isArray(msg.content)) {
-          toolCalls += msg.content.filter(c => c.type === 'toolCall').length;
+          const toolCallEntries = msg.content.filter(c => c.type === 'toolCall');
+          toolCalls += toolCallEntries.length;
+
+          // Log tool calls
+          for (const tc of toolCallEntries) {
+            activityLog.push({
+              type: 'tool_call',
+              timestamp: entry.timestamp,
+              tool: tc.name || tc.toolName || 'unknown',
+              args: JSON.stringify(tc.arguments || {}).slice(0, 200),
+              tokens,
+            });
+          }
         }
       }
 
-      // Collect recent assistant messages (last 5)
+      // Log messages
       if (role === 'assistant') {
-        const preview = Array.isArray(msg.content)
+        const fullText = Array.isArray(msg.content)
           ? msg.content.find(c => c.type === 'text')?.text || ''
           : typeof msg.content === 'string' ? msg.content : '';
 
-        if (preview.trim()) {
+        if (fullText.trim()) {
+          const isTruncated = fullText.length > 200;
           recentMessages.push({
             timestamp: entry.timestamp,
-            preview: preview.slice(0, 120).trim() + (preview.length > 120 ? '…' : ''),
+            preview: fullText.slice(0, 200).trim() + (isTruncated ? '…' : ''),
+            full: fullText.trim(),
+          });
+
+          activityLog.push({
+            type: 'message',
+            timestamp: entry.timestamp,
+            preview: fullText.slice(0, 200).trim() + (isTruncated ? '…' : ''),
+            full: fullText.trim(),
+            tokens,
+          });
+        }
+      }
+
+      if (role === 'user') {
+        const fullText = typeof msg.content === 'string' ? msg.content : extractText(msg.content);
+        if (fullText.trim()) {
+          const isTruncated = fullText.length > 200;
+          activityLog.push({
+            type: 'user_message',
+            timestamp: entry.timestamp,
+            preview: fullText.slice(0, 200).trim() + (isTruncated ? '…' : ''),
+            full: fullText.trim(),
+            tokens,
           });
         }
       }
     }
   }
 
-  // Keep only the last 5 messages
-  recentMessages = recentMessages.slice(-5).reverse();
+  recentMessages = recentMessages.slice(-10).reverse();
+  activityLog = activityLog.slice(-50).reverse();
 
   return {
     sessionId,
@@ -121,6 +158,7 @@ function parseSession(jsonlPath, sessionId) {
     totalTokens: inputTokens + outputTokens,
     lastActivity,
     recentMessages,
+    activityLog,
   };
 }
 
@@ -147,10 +185,13 @@ function getAgents() {
     let totalTokens = 0;
     let totalMessages = 0;
     let totalToolCalls = 0;
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
     let lastActivity = null;
     let model = 'unknown';
     let activeSessionId = null;
     let recentMessages = [];
+    let activityLog = [];
     let sessionCount = 0;
 
     for (const [sessionKey, sessionMeta] of Object.entries(sessions)) {
@@ -162,17 +203,19 @@ function getAgents() {
       if (fs.existsSync(jsonlPath)) {
         const parsed = parseSession(jsonlPath, sessionId);
         totalTokens += parsed.totalTokens;
+        totalInputTokens += parsed.inputTokens;
+        totalOutputTokens += parsed.outputTokens;
         totalMessages += parsed.messageCount;
         totalToolCalls += parsed.toolCalls;
         model = parsed.model !== 'unknown' ? parsed.model : model;
         if (!lastActivity || (parsed.lastActivity && parsed.lastActivity > lastActivity)) {
           lastActivity = parsed.lastActivity;
           recentMessages = parsed.recentMessages;
+          activityLog = parsed.activityLog;
         }
       }
     }
 
-    // Determine status
     const now = Date.now();
     const minutesSinceActive = lastActivity ? (now - lastActivity) / 60000 : Infinity;
     let status = 'idle';
@@ -190,9 +233,12 @@ function getAgents() {
       totalMessages,
       totalToolCalls,
       totalTokens,
+      totalInputTokens,
+      totalOutputTokens,
       lastActivity,
       minutesSinceActive: Math.floor(minutesSinceActive),
       recentMessages,
+      activityLog,
     });
   }
 
@@ -221,12 +267,10 @@ function getSystemStats(agents) {
   const totalMessages = agents.reduce((s, a) => s + a.totalMessages, 0);
   const totalToolCalls = agents.reduce((s, a) => s + a.totalToolCalls, 0);
   const activeAgents = agents.filter(a => a.status === 'active').length;
+  const totalInputTokens = agents.reduce((s, a) => s + (a.totalInputTokens || 0), 0);
+  const totalOutputTokens = agents.reduce((s, a) => s + (a.totalOutputTokens || 0), 0);
 
-  // Rough cost estimate: claude-sonnet-4 pricing
-  // Input: $3/M tokens, Output: $15/M tokens (estimate 30% output)
-  const estimatedOutputTokens = Math.floor(totalTokens * 0.3);
-  const estimatedInputTokens = totalTokens - estimatedOutputTokens;
-  const estimatedCost = ((estimatedInputTokens / 1_000_000) * 3) + ((estimatedOutputTokens / 1_000_000) * 15);
+  const estimatedCost = ((totalInputTokens / 1_000_000) * 3) + ((totalOutputTokens / 1_000_000) * 15);
 
   return {
     totalTokens,
@@ -234,6 +278,8 @@ function getSystemStats(agents) {
     totalToolCalls,
     activeAgents,
     totalAgents: agents.length,
+    totalInputTokens,
+    totalOutputTokens,
     estimatedCostUSD: estimatedCost.toFixed(4),
   };
 }
@@ -257,11 +303,9 @@ function parseSkillMd(filePath) {
     const description = get('description');
     const homepage = get('homepage');
 
-    // Extract emoji from metadata line
     const emojiMatch = frontmatter.match(/"emoji":\s*"([^"]+)"/);
     const emoji = emojiMatch ? emojiMatch[1] : null;
 
-    // Extract requires
     const binsMatch = frontmatter.match(/"bins":\s*\[([^\]]+)\]/);
     const anyBinsMatch = frontmatter.match(/"anyBins":\s*\[([^\]]+)\]/);
     const configMatch = frontmatter.match(/"config":\s*\[([^\]]+)\]/);
@@ -302,11 +346,7 @@ app.get('/api/data', (req, res) => {
   try {
     const agents = getAgents();
     const system = getSystemStats(agents);
-    res.json({
-      timestamp: new Date().toISOString(),
-      system,
-      agents,
-    });
+    res.json({ timestamp: new Date().toISOString(), system, agents });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -322,8 +362,44 @@ app.get('/api/skills', (req, res) => {
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
+// ─── WebSocket ───────────────────────────────────────────────────────────────
+
+let connectedClients = 0;
+
+io.on('connection', (socket) => {
+  connectedClients++;
+  console.log(`📡 Client connected (${connectedClients} total)`);
+
+  // Send initial data immediately
+  try {
+    const agents = getAgents();
+    const system = getSystemStats(agents);
+    socket.emit('dashboard-update', { timestamp: new Date().toISOString(), system, agents });
+  } catch (err) {
+    console.error('Error sending initial data:', err.message);
+  }
+
+  socket.on('disconnect', () => {
+    connectedClients--;
+    console.log(`📡 Client disconnected (${connectedClients} total)`);
+  });
+});
+
+// Broadcast updates every 5 seconds
+setInterval(() => {
+  if (connectedClients === 0) return;
+  try {
+    const agents = getAgents();
+    const system = getSystemStats(agents);
+    io.emit('dashboard-update', { timestamp: new Date().toISOString(), system, agents });
+  } catch (err) {
+    console.error('Error broadcasting update:', err.message);
+  }
+}, 5000);
+
 // ─── Start ───────────────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  console.log(`\n🤖 Agent Dashboard running at http://localhost:${PORT}\n`);
+server.listen(PORT, () => {
+  console.log(`\n🤖 Agent Dashboard running at http://localhost:${PORT}`);
+  console.log(`📡 WebSocket live updates enabled\n`);
 });
