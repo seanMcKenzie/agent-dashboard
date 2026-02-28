@@ -99,6 +99,7 @@ function parseSession(jsonlPath, sessionId) {
               timestamp: entry.timestamp,
               tool: tc.name || tc.toolName || 'unknown',
               args: JSON.stringify(tc.arguments || {}).slice(0, 200),
+              fullArgs: JSON.stringify(tc.arguments || {}, null, 2),
               tokens,
             });
           }
@@ -111,12 +112,21 @@ function parseSession(jsonlPath, sessionId) {
           ? msg.content.find(c => c.type === 'text')?.text || ''
           : typeof msg.content === 'string' ? msg.content : '';
 
-        if (fullText.trim()) {
+        // Extract tool calls for this message
+        const msgToolCalls = Array.isArray(msg.content)
+          ? msg.content.filter(c => c.type === 'toolCall').map(tc => ({
+              name: tc.name || tc.toolName || 'unknown',
+              args: JSON.stringify(tc.arguments || {}, null, 2),
+            }))
+          : [];
+
+        if (fullText.trim() || msgToolCalls.length) {
           const isTruncated = fullText.length > 200;
           recentMessages.push({
             timestamp: entry.timestamp,
             preview: fullText.slice(0, 200).trim() + (isTruncated ? '…' : ''),
             full: fullText.trim(),
+            toolCalls: msgToolCalls,
           });
 
           activityLog.push({
@@ -124,6 +134,7 @@ function parseSession(jsonlPath, sessionId) {
             timestamp: entry.timestamp,
             preview: fullText.slice(0, 200).trim() + (isTruncated ? '…' : ''),
             full: fullText.trim(),
+            toolCalls: msgToolCalls,
             tokens,
           });
         }
@@ -262,6 +273,50 @@ function formatAgentName(name) {
   return names[name] || name.charAt(0).toUpperCase() + name.slice(1);
 }
 
+function getToolUsage() {
+  const overall = {};
+  const perAgent = {};
+
+  if (!fs.existsSync(AGENTS_DIR)) return { overall, perAgent };
+
+  const agentDirs = fs.readdirSync(AGENTS_DIR).filter(name => {
+    return fs.statSync(path.join(AGENTS_DIR, name)).isDirectory();
+  });
+
+  for (const agentName of agentDirs) {
+    const sessionsDir = path.join(AGENTS_DIR, agentName, 'sessions');
+    const sessionsJsonPath = path.join(sessionsDir, 'sessions.json');
+    const agentTools = {};
+
+    let sessions = {};
+    try { sessions = JSON.parse(fs.readFileSync(sessionsJsonPath, 'utf8')); } catch {}
+
+    for (const [, sessionMeta] of Object.entries(sessions)) {
+      const jsonlPath = path.join(sessionsDir, `${sessionMeta.sessionId}.jsonl`);
+      if (!fs.existsSync(jsonlPath)) continue;
+      const entries = readJsonl(jsonlPath);
+      for (const entry of entries) {
+        if (!entry || entry.type !== 'message' || !entry.message) continue;
+        const msg = entry.message;
+        if (msg.role !== 'assistant' || !Array.isArray(msg.content)) continue;
+        for (const c of msg.content) {
+          if (c.type === 'toolCall') {
+            const toolName = c.name || c.toolName || 'unknown';
+            overall[toolName] = (overall[toolName] || 0) + 1;
+            agentTools[toolName] = (agentTools[toolName] || 0) + 1;
+          }
+        }
+      }
+    }
+
+    if (Object.keys(agentTools).length > 0) {
+      perAgent[agentName] = agentTools;
+    }
+  }
+
+  return { overall, perAgent };
+}
+
 function getSystemStats(agents) {
   const totalTokens = agents.reduce((s, a) => s + a.totalTokens, 0);
   const totalMessages = agents.reduce((s, a) => s + a.totalMessages, 0);
@@ -340,13 +395,132 @@ function getSkills() {
     .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 }
 
+function getSkillUsage() {
+  const overall = {};
+  const perAgent = {};
+
+  if (!fs.existsSync(AGENTS_DIR)) return { overall, perAgent };
+
+  const agentDirs = fs.readdirSync(AGENTS_DIR).filter(name => {
+    return fs.statSync(path.join(AGENTS_DIR, name)).isDirectory();
+  });
+
+  for (const agentName of agentDirs) {
+    const sessionsDir = path.join(AGENTS_DIR, agentName, 'sessions');
+    const sessionsJsonPath = path.join(sessionsDir, 'sessions.json');
+    const agentSkills = {};
+
+    let sessions = {};
+    try { sessions = JSON.parse(fs.readFileSync(sessionsJsonPath, 'utf8')); } catch {}
+
+    for (const [, sessionMeta] of Object.entries(sessions)) {
+      const jsonlPath = path.join(sessionsDir, `${sessionMeta.sessionId}.jsonl`);
+      if (!fs.existsSync(jsonlPath)) continue;
+      const entries = readJsonl(jsonlPath);
+      for (const entry of entries) {
+        if (!entry || entry.type !== 'message' || !entry.message) continue;
+        const msg = entry.message;
+        if (msg.role !== 'assistant' || !Array.isArray(msg.content)) continue;
+        for (const c of msg.content) {
+          if (c.type !== 'toolCall') continue;
+          const toolName = (c.name || c.toolName || '').toLowerCase();
+          if (toolName !== 'read') continue;
+          const args = c.arguments || {};
+          const filePath = args.path || args.file_path || args.filePath || '';
+          if (!filePath.includes('/skills/')) continue;
+          const match = filePath.match(/\/skills\/([^/]+)\//);
+          if (!match) continue;
+          const skillName = match[1];
+          overall[skillName] = (overall[skillName] || 0) + 1;
+          agentSkills[skillName] = (agentSkills[skillName] || 0) + 1;
+        }
+      }
+    }
+
+    if (Object.keys(agentSkills).length > 0) {
+      perAgent[agentName] = agentSkills;
+    }
+  }
+
+  return { overall, perAgent };
+}
+
+// ─── API Usage ───────────────────────────────────────────────────────────────
+
+function getApiUsage() {
+  const byProvider = {};
+  const byModel = {};
+  const byApi = {};
+  const totals = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0, cost: 0, messages: 0 };
+
+  function accum(bucket, key, usage, cost) {
+    if (!bucket[key]) bucket[key] = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0, cost: 0, messages: 0 };
+    const b = bucket[key];
+    b.input += usage.input || 0;
+    b.output += usage.output || 0;
+    b.cacheRead += usage.cacheRead || 0;
+    b.cacheWrite += usage.cacheWrite || 0;
+    b.totalTokens += usage.totalTokens || 0;
+    b.cost += cost;
+    b.messages++;
+  }
+
+  if (!fs.existsSync(AGENTS_DIR)) return { byProvider, byModel, byApi, totals };
+
+  const agentDirs = fs.readdirSync(AGENTS_DIR).filter(name => {
+    try { return fs.statSync(path.join(AGENTS_DIR, name)).isDirectory(); } catch { return false; }
+  });
+
+  for (const agentName of agentDirs) {
+    const sessionsDir = path.join(AGENTS_DIR, agentName, 'sessions');
+    const sessionsJsonPath = path.join(sessionsDir, 'sessions.json');
+
+    let sessions = {};
+    try { sessions = JSON.parse(fs.readFileSync(sessionsJsonPath, 'utf8')); } catch {}
+
+    for (const [, sessionMeta] of Object.entries(sessions)) {
+      const jsonlPath = path.join(sessionsDir, `${sessionMeta.sessionId}.jsonl`);
+      if (!fs.existsSync(jsonlPath)) continue;
+      const entries = readJsonl(jsonlPath);
+      for (const entry of entries) {
+        if (!entry || entry.type !== 'message' || !entry.message) continue;
+        const msg = entry.message;
+        if (msg.role !== 'assistant' || !msg.usage) continue;
+
+        const usage = msg.usage;
+        const cost = (usage.cost && typeof usage.cost.total === 'number') ? usage.cost.total : 0;
+        const provider = msg.provider || 'unknown';
+        const model = msg.model || 'unknown';
+        const api = msg.api || 'unknown';
+
+        accum(byProvider, provider, usage, cost);
+        accum(byModel, model, usage, cost);
+        accum(byApi, api, usage, cost);
+
+        totals.input += usage.input || 0;
+        totals.output += usage.output || 0;
+        totals.cacheRead += usage.cacheRead || 0;
+        totals.cacheWrite += usage.cacheWrite || 0;
+        totals.totalTokens += usage.totalTokens || 0;
+        totals.cost += cost;
+        totals.messages++;
+      }
+    }
+  }
+
+  return { byProvider, byModel, byApi, totals };
+}
+
 // ─── Routes ──────────────────────────────────────────────────────────────────
 
 app.get('/api/data', (req, res) => {
   try {
     const agents = getAgents();
     const system = getSystemStats(agents);
-    res.json({ timestamp: new Date().toISOString(), system, agents });
+    const toolUsage = getToolUsage();
+    const skillUsage = getSkillUsage();
+    const apiUsage = getApiUsage();
+    res.json({ timestamp: new Date().toISOString(), system, agents, toolUsage, skillUsage, apiUsage });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -374,7 +548,10 @@ io.on('connection', (socket) => {
   try {
     const agents = getAgents();
     const system = getSystemStats(agents);
-    socket.emit('dashboard-update', { timestamp: new Date().toISOString(), system, agents });
+    const toolUsage = getToolUsage();
+    const skillUsage = getSkillUsage();
+    const apiUsage = getApiUsage();
+    socket.emit('dashboard-update', { timestamp: new Date().toISOString(), system, agents, toolUsage, skillUsage, apiUsage });
   } catch (err) {
     console.error('Error sending initial data:', err.message);
   }
@@ -391,7 +568,10 @@ setInterval(() => {
   try {
     const agents = getAgents();
     const system = getSystemStats(agents);
-    io.emit('dashboard-update', { timestamp: new Date().toISOString(), system, agents });
+    const toolUsage = getToolUsage();
+    const skillUsage = getSkillUsage();
+    const apiUsage = getApiUsage();
+    io.emit('dashboard-update', { timestamp: new Date().toISOString(), system, agents, toolUsage, skillUsage, apiUsage });
   } catch (err) {
     console.error('Error broadcasting update:', err.message);
   }
